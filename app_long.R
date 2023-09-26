@@ -245,6 +245,7 @@ ui <- secure_app(ui)
 server <- function(input, output, session){
   
   options(shiny.maxRequestSize=10*1024^2)
+  # datasets <- load_data("database")
   
   res_auth <- secure_server(
     check_credentials = check_credentials(credentials)
@@ -255,7 +256,7 @@ server <- function(input, output, session){
   
   # Explore dataset tab output
   datasetInput <- eventReactive(input$dataset,{
-    get(input$dataset)
+    get(input$dataset) # datasets[[input$dataset]]
   })
   
   observeEvent(input$dataset, {

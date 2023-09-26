@@ -7,6 +7,38 @@ library(stringr)
 
 ########################################## Prepare the data ###############################################
 
+ingest_data_default <- function(params) {
+    # example input
+    # param = list(name="dataset_1", responsiblePerson = "Thomas", ...)
+    dataset <- read.csv(file.path('data', param$name, ".csv"))
+    subset <- dataset %>% select(
+        Gene.names,
+        starts_with("logFC"),
+        starts_with("adjpval")
+    )
+    subset$contrast <- param$contrast
+    subset$dataset <- param$name
+    colnames(subset) <- c("GeneID", "logFC", "padj", "contrast", "dataset")
+}
+
+load_data <- function() {
+    database <- read.csv(file.path('data', 'database.csv'))
+
+    datasets <- list()
+    for(entry in database) {
+        if(entry$type == "default") {
+            datasets <- c(datasets, ingest_data_default(entry))
+        } else if(entry$type == "custom") {
+            ingest_data_custom(entry)
+        } else {
+            stop("Unknown type of entry in database")
+        }
+    }
+
+    return(datasets)
+}
+
+
 # 2006 RNF43
 data_2006.RNF43 <- read.csv(here('data', 'shinyapp_2006-RNF43.csv'))
 long_2006.RNF43 <- data_2006.RNF43 %>% select(Gene.names, starts_with("logFC"), starts_with("adjpval"))
